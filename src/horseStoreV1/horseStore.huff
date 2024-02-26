@@ -13,6 +13,8 @@
 #define function updateHorseNumber(uint256) nonpayable returns()
 #define function readNumberOfHorses() view returns(uint256)
 
+#define constant NUMBER_OF_HORSES_STORAGE_SLOT = FREE_STORAGE_POINTER()
+
 #define macro MAIN() = takes(0) returns(0) {
     0x00 calldataload 0xe0 shr  // [functionSelector]
     dup1    // [functionSelector, functionSelector]
@@ -33,8 +35,15 @@
         READ_NUMBER_OF_HORSES()
 
     updateJump:
-        SET_NUMBER_OF_HORSES()
+        UPDATE_NUMBER_OF_HORSES()
 }
 
-#define macro SET_NUMBER_OF_HORSES() = takes(0) returns(0) {}
+#define macro UPDATE_NUMBER_OF_HORSES() = takes(0) returns(0) {
+    0x04   // (the number of bytes of the function selector)
+    calldataload  // the first 32 bytes starting from the function selector
+
+    [NUMBER_OF_HORSES_STORAGE_SLOT] // [storage_slot, value]
+    sstore
+    stop
+}
 #define macro READ_NUMBER_OF_HORSES() = takes(0) returns(0) {}
