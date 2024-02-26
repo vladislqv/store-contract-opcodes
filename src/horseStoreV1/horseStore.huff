@@ -1,0 +1,40 @@
+
+// 60008060093d393df3
+// "Hey, take the binary after me, and stick it on-chain"
+
+// 60 - PUSH1 0x00
+// 80 - DUP1 - duplicates the first value in the stack
+// 60 - PUSH1 0x09
+// 3d - RETURNDATASIZE - pushes the size of the return data to the stack
+// 39 - CODECOPY - Copy code running in current environment to memory
+// 3d - RETURNDATASIZE - pushes the size of the return data to the stack
+// f3 - RETURN - halts execution and returns data
+
+#define function updateHorseNumber(uint256) nonpayable returns()
+#define function readNumberOfHorses() view returns(uint256)
+
+#define macro MAIN() = takes(0) returns(0) {
+    0x00 calldataload 0xe0 shr  // [functionSelector]
+    dup1    // [functionSelector, functionSelector]
+    
+    __FUNC_SIG(updateHorseNumber)  // [0xcdfead2e, functionSelector, functionSelector]
+    eq  // [true/false, functionSelector] true if the function selectors matches]
+    updateJump  // [updateHorseNumberProgramCounter, true/false, functionSelector]
+    jumpi   // [functionSelector]
+
+    __FUNC_SIG(readNumberOfHorses)  // [0xe026c017, functionSelector]
+    eq  // [true/false] true if the function selectors matches]
+    readJump  // [readNumberOfHorsesProgramCounter, true/false]
+    jumpi   // []
+
+    0x00 0x00 revert
+
+    readJump:
+        READ_NUMBER_OF_HORSES()
+
+    updateJump:
+        SET_NUMBER_OF_HORSES()
+}
+
+#define macro SET_NUMBER_OF_HORSES() = takes(0) returns(0) {}
+#define macro READ_NUMBER_OF_HORSES() = takes(0) returns(0) {}
